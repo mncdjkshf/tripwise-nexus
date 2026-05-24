@@ -9,38 +9,195 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RideRouteImport } from './routes/ride'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as DriverRouteImport } from './routes/driver'
+import { Route as BecomeDriverRouteImport } from './routes/become-driver'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackRideIdRouteImport } from './routes/track.$rideId'
 
+const RideRoute = RideRouteImport.update({
+  id: '/ride',
+  path: '/ride',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverRoute = DriverRouteImport.update({
+  id: '/driver',
+  path: '/driver',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BecomeDriverRoute = BecomeDriverRouteImport.update({
+  id: '/become-driver',
+  path: '/become-driver',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackRideIdRoute = TrackRideIdRouteImport.update({
+  id: '/track/$rideId',
+  path: '/track/$rideId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/become-driver': typeof BecomeDriverRoute
+  '/driver': typeof DriverRoute
+  '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/ride': typeof RideRoute
+  '/track/$rideId': typeof TrackRideIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/become-driver': typeof BecomeDriverRoute
+  '/driver': typeof DriverRoute
+  '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/ride': typeof RideRoute
+  '/track/$rideId': typeof TrackRideIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/become-driver': typeof BecomeDriverRoute
+  '/driver': typeof DriverRoute
+  '/history': typeof HistoryRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/ride': typeof RideRoute
+  '/track/$rideId': typeof TrackRideIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/become-driver'
+    | '/driver'
+    | '/history'
+    | '/login'
+    | '/register'
+    | '/ride'
+    | '/track/$rideId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/become-driver'
+    | '/driver'
+    | '/history'
+    | '/login'
+    | '/register'
+    | '/ride'
+    | '/track/$rideId'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/become-driver'
+    | '/driver'
+    | '/history'
+    | '/login'
+    | '/register'
+    | '/ride'
+    | '/track/$rideId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  BecomeDriverRoute: typeof BecomeDriverRoute
+  DriverRoute: typeof DriverRoute
+  HistoryRoute: typeof HistoryRoute
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
+  RideRoute: typeof RideRoute
+  TrackRideIdRoute: typeof TrackRideIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ride': {
+      id: '/ride'
+      path: '/ride'
+      fullPath: '/ride'
+      preLoaderRoute: typeof RideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver': {
+      id: '/driver'
+      path: '/driver'
+      fullPath: '/driver'
+      preLoaderRoute: typeof DriverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/become-driver': {
+      id: '/become-driver'
+      path: '/become-driver'
+      fullPath: '/become-driver'
+      preLoaderRoute: typeof BecomeDriverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +205,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track/$rideId': {
+      id: '/track/$rideId'
+      path: '/track/$rideId'
+      fullPath: '/track/$rideId'
+      preLoaderRoute: typeof TrackRideIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  BecomeDriverRoute: BecomeDriverRoute,
+  DriverRoute: DriverRoute,
+  HistoryRoute: HistoryRoute,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
+  RideRoute: RideRoute,
+  TrackRideIdRoute: TrackRideIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
