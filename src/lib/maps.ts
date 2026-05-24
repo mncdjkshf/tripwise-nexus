@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 /* Google Maps JS API loader (browser-only). Uses the Lovable connector browser key. */
 let loadPromise: Promise<typeof google> | null = null;
 
