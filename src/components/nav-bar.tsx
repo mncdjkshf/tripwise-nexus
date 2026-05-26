@@ -22,7 +22,7 @@ export function NavBar() {
           <div className="grid h-8 w-8 place-items-center rounded-lg gradient-accent">
             <Car className="h-4 w-4 text-accent-foreground" />
           </div>
-          <span className="text-lg font-bold tracking-tight">Swift</span>
+          <span className="text-lg font-bold tracking-tight">Tahu cab's</span>
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">

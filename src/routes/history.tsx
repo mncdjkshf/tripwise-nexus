@@ -8,7 +8,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Ride = Database["public"]["Tables"]["rides"]["Row"];
 
 export const Route = createFileRoute("/history")({
-  head: () => ({ meta: [{ title: "Ride history — Swift" }] }),
+  head: () => ({ meta: [{ title: "Ride history — Tahu cab's" }] }),
   component: History,
 });
 

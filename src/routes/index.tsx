@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Swift — Ride in minutes, drive on your schedule" },
-      { name: "description", content: "Book a ride in seconds with live tracking, transparent pricing, and modern vehicles. Or drive with Swift and earn on your own schedule." },
+      { title: "Tahu cab's — Ride in minutes, drive on your schedule" },
+      { name: "description", content: "Book a ride in seconds with live tracking, transparent pricing, and modern vehicles. Or drive with Tahu cab's and earn on your own schedule." },
     ],
   }),
   component: Home,
@@ -41,7 +41,7 @@ function Home() {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
-                  <Link to="/become-driver">Drive with Swift</Link>
+                  <Link to="/become-driver">Drive with Tahu cab's</Link>
                 </Button>
               </div>
             </div>
@@ -105,7 +105,7 @@ function Home() {
             <div className="grid items-center gap-8 md:grid-cols-2">
               <div>
                 <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs text-accent">
-                  <Car className="h-3 w-3" /> Earn with Swift
+                  <Car className="h-3 w-3" /> Earn with Tahu cab's
                 </span>
                 <h2 className="mt-4 text-3xl font-bold md:text-4xl">Your car. Your hours. Your earnings.</h2>
                 <p className="mt-3 text-muted-foreground">Sign up as a driver in minutes and start accepting rides.</p>
@@ -122,7 +122,7 @@ function Home() {
 
       <footer className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8 text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} Swift</span>
+          <span>© {new Date().getFullYear()} Tahu cab's</span>
           <span>Built on Lovable</span>
         </div>
       </footer>

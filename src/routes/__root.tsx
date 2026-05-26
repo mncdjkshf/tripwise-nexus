@@ -55,9 +55,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Swift — Ride in minutes" },
+      { title: "Tahu cab's — Ride in minutes" },
       { name: "description", content: "Book rides in seconds. Drive on your schedule. The modern ride-booking platform." },
-      { property: "og:title", content: "Swift — Ride in minutes" },
+      { property: "og:title", content: "Tahu cab's — Ride in minutes" },
       { property: "og:description", content: "Modern ride-booking platform with live tracking." },
       { property: "og:type", content: "website" },
     ],
