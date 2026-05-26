@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { loadGoogleMaps, haversineKm, estimateFare, RIDE_TYPES } from "@/lib/maps";
 
 export const Route = createFileRoute("/ride")({
-  head: () => ({ meta: [{ title: "Book a ride — Swift" }] }),
+  head: () => ({ meta: [{ title: "Book a ride — Tahu cab's" }] }),
   component: BookRide,
 });
 

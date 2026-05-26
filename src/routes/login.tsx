@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — Swift" }] }),
+  head: () => ({ meta: [{ title: "Sign in — Tahu cab's" }] }),
   component: Login,
 });
 
@@ -41,7 +41,7 @@ function Login() {
       <div className="glass w-full max-w-md rounded-3xl p-8 shadow-elegant">
         <Link to="/" className="flex items-center gap-2">
           <div className="grid h-8 w-8 place-items-center rounded-lg gradient-accent"><Car className="h-4 w-4 text-accent-foreground" /></div>
-          <span className="text-lg font-bold">Swift</span>
+          <span className="text-lg font-bold">Tahu cab's</span>
         </Link>
         <h1 className="mt-6 text-2xl font-bold">Welcome back</h1>
         <p className="mt-1 text-sm text-muted-foreground">Sign in to book or drive.</p>
@@ -66,7 +66,7 @@ function Login() {
         <Button variant="outline" className="w-full" onClick={onGoogle}>Continue with Google</Button>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          New to Swift? <Link to="/register" className="text-accent hover:underline">Create an account</Link>
+          New to Tahu cab's? <Link to="/register" className="text-accent hover:underline">Create an account</Link>
         </p>
       </div>
     </div>

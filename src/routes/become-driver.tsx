@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/become-driver")({
-  head: () => ({ meta: [{ title: "Become a driver — Swift" }] }),
+  head: () => ({ meta: [{ title: "Become a driver — Tahu cab's" }] }),
   component: BecomeDriver,
 });
 

@@ -12,7 +12,7 @@ type Driver = Database["public"]["Tables"]["drivers"]["Row"];
 type Ride = Database["public"]["Tables"]["rides"]["Row"];
 
 export const Route = createFileRoute("/driver")({
-  head: () => ({ meta: [{ title: "Driver — Swift" }] }),
+  head: () => ({ meta: [{ title: "Driver — Tahu cab's" }] }),
   component: DriverDashboard,
 });
 
