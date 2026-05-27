@@ -52,18 +52,18 @@ function Home() {
               <div className="mt-4 space-y-3">
                 <div className="flex items-center gap-3 rounded-xl bg-secondary/60 px-4 py-3">
                   <div className="h-2.5 w-2.5 rounded-full bg-accent" />
-                  <span className="text-sm">Market Street, SF</span>
+                  <span className="text-sm">MG Road, Bengaluru</span>
                 </div>
                 <div className="flex items-center gap-3 rounded-xl bg-secondary/60 px-4 py-3">
                   <div className="h-2.5 w-2.5 rounded-full bg-destructive" />
-                  <span className="text-sm">SFO Airport, Terminal 2</span>
+                  <span className="text-sm">Kempegowda Intl. Airport, T2</span>
                 </div>
               </div>
               <div className="mt-5 grid grid-cols-3 gap-2">
                 {[
-                  { l: "RideX", p: "$24.50", e: "3 min" },
-                  { l: "Premier", p: "$39.20", e: "5 min" },
-                  { l: "XL", p: "$51.80", e: "6 min" },
+                  { l: "TahuGo", p: "₹540", e: "3 min" },
+                  { l: "TahuPrime", p: "₹860", e: "5 min" },
+                  { l: "TahuXL", p: "₹1,140", e: "6 min" },
                 ].map((x) => (
                   <div key={x.l} className="rounded-xl border border-border/60 bg-card/60 p-3">
                     <p className="text-xs text-muted-foreground">{x.l}</p>
@@ -73,7 +73,7 @@ function Home() {
                 ))}
               </div>
               <Button asChild className="mt-5 w-full gradient-accent text-accent-foreground">
-                <Link to="/ride">Confirm RideX</Link>
+                <Link to="/ride">Confirm TahuGo</Link>
               </Button>
             </div>
           </div>

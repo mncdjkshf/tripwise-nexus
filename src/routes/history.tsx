@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { NavBar } from "@/components/nav-bar";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatINR } from "@/lib/format";
 import type { Database } from "@/integrations/supabase/types";
 
 type Ride = Database["public"]["Tables"]["rides"]["Row"];
@@ -33,7 +34,7 @@ function History() {
           {rides.map((r) => (
             <Link key={r.id} to="/track/$rideId" params={{ rideId: r.id }} className="block rounded-2xl border border-border/60 bg-card p-4 hover:bg-secondary">
               <div className="flex justify-between">
-                <span className="text-sm font-semibold">${r.fare} · {r.ride_type}</span>
+                <span className="text-sm font-semibold">{formatINR(r.fare)} · {r.ride_type}</span>
                 <span className="text-xs text-muted-foreground">{r.status}</span>
               </div>
               <p className="mt-1 truncate text-xs text-muted-foreground">{r.pickup_address} → {r.dropoff_address}</p>
