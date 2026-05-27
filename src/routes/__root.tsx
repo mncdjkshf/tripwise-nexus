@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "@/components/ui/sonner";
+import { BottomNav } from "@/components/bottom-nav";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -105,7 +106,8 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AuthInvalidator />
-        <Outlet />
+        <div className="pb-16 md:pb-0"><Outlet /></div>
+        <BottomNav />
         <Toaster position="top-center" theme="dark" />
       </AuthProvider>
     </QueryClientProvider>

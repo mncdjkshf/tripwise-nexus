@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatINR } from "@/lib/format";
 import type { Database } from "@/integrations/supabase/types";
 
 type Driver = Database["public"]["Tables"]["drivers"]["Row"];
@@ -105,7 +106,7 @@ function DriverDashboard() {
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Stat label="Rides" value={driver.total_rides} />
-          <Stat label="Earnings" value={`$${Number(driver.total_earnings).toFixed(2)}`} />
+          <Stat label="Earnings" value={formatINR(driver.total_earnings)} />
           <Stat label="Rating" value={`${Number(driver.rating).toFixed(2)} ★`} />
         </div>
 
@@ -132,7 +133,7 @@ function DriverDashboard() {
               {requests.map((r) => (
                 <div key={r.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4">
                   <div>
-                    <p className="text-sm font-semibold">${r.fare} · {r.distance_km} km · {r.ride_type}</p>
+                    <p className="text-sm font-semibold">{formatINR(r.fare)} · {r.distance_km} km · {r.ride_type}</p>
                     <p className="text-xs text-muted-foreground">{r.pickup_address} → {r.dropoff_address}</p>
                   </div>
                   <Button onClick={() => accept(r)} className="gradient-accent text-accent-foreground">Accept</Button>

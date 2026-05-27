@@ -4,6 +4,7 @@ import { NavBar } from "@/components/nav-bar";
 import { RideMap } from "@/components/ride-map";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { formatINR } from "@/lib/format";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Tahu cab's" }] }),
@@ -47,7 +48,7 @@ function Admin() {
           <Stat label="Riders" value={stats.users} />
           <Stat label="Drivers" value={stats.drivers} />
           <Stat label="Total rides" value={stats.rides} />
-          <Stat label="Revenue" value={`$${stats.revenue.toFixed(2)}`} />
+          <Stat label="Revenue" value={formatINR(stats.revenue)} />
         </div>
         <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
           <div className="h-[480px] overflow-hidden rounded-2xl border border-border/60 bg-card">
@@ -59,7 +60,7 @@ function Admin() {
               {recent.map((r) => (
                 <Link key={r.id} to="/track/$rideId" params={{ rideId: r.id }} className="block rounded-xl border border-border/60 p-3 text-sm hover:bg-secondary">
                   <div className="flex justify-between">
-                    <span className="font-semibold">${r.fare}</span>
+                    <span className="font-semibold">{formatINR(r.fare)}</span>
                     <span className="text-xs text-muted-foreground">{r.status}</span>
                   </div>
                   <p className="mt-1 truncate text-xs text-muted-foreground">{r.pickup_address} → {r.dropoff_address}</p>
