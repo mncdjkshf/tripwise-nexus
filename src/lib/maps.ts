@@ -40,15 +40,16 @@ export function haversineKm(a: { lat: number; lng: number }, b: { lat: number; l
 }
 
 export const RIDE_TYPES = [
-  { id: "economy", label: "RideX", desc: "Affordable everyday rides", mult: 1.0, eta: 3 },
-  { id: "premium", label: "Premier", desc: "Newer cars, top drivers", mult: 1.6, eta: 5 },
-  { id: "bike", label: "Moto", desc: "Beat the traffic", mult: 0.55, eta: 2 },
-  { id: "suv", label: "XL", desc: "Up to 6 passengers", mult: 2.1, eta: 6 },
+  { id: "economy", label: "TahuGo", desc: "Affordable everyday rides", mult: 1.0, eta: 3 },
+  { id: "premium", label: "TahuPrime", desc: "Newer cars, top drivers", mult: 1.6, eta: 5 },
+  { id: "bike", label: "TahuMoto", desc: "Beat the traffic", mult: 0.45, eta: 2 },
+  { id: "suv", label: "TahuXL", desc: "Up to 6 passengers", mult: 2.1, eta: 6 },
 ] as const;
 
 export function estimateFare(distanceKm: number, type: string) {
-  const base = 2.5;
-  const perKm = 1.35;
+  // INR pricing: base ₹40, ₹14/km
+  const base = 40;
+  const perKm = 14;
   const t = RIDE_TYPES.find((r) => r.id === type) ?? RIDE_TYPES[0];
-  return Math.max(3, Math.round((base + distanceKm * perKm) * t.mult * 100) / 100);
+  return Math.max(50, Math.round((base + distanceKm * perKm) * t.mult));
 }
