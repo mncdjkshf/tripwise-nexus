@@ -13,6 +13,14 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
+async function routeByRole(userId: string): Promise<string> {
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const roles = (data ?? []).map((r) => r.role as string);
+  if (roles.includes("admin")) return "/admin";
+  if (roles.includes("driver")) return "/driver";
+  return "/ride";
+}
+
 function Login() {
   const nav = useNavigate();
   const router = useRouter();
@@ -23,12 +31,13 @@ function Login() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back");
     router.invalidate();
-    nav({ to: "/ride" });
+    const to = data.user ? await routeByRole(data.user.id) : "/ride";
+    nav({ to });
   };
 
   const onGoogle = async () => {
