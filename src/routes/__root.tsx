@@ -91,14 +91,31 @@ function AuthInvalidator() {
   const router = useRouter();
   const qc = useQueryClient();
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       router.invalidate();
       qc.invalidateQueries();
+      // Restrict Google: only allow sign-in for pre-validated accounts.
+      if (event === "SIGNED_IN" && session?.user) {
+        const provider = session.user.app_metadata?.provider;
+        if (provider && provider !== "email") {
+          const { data: prof } = await supabase
+            .from("profiles")
+            .select("is_validated")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+          if (!prof?.is_validated) {
+            await supabase.auth.signOut();
+            const { toast } = await import("sonner");
+            toast.error("This Google account isn't verified. Please register and complete OTP first.");
+          }
+        }
+      }
     });
     return () => subscription.unsubscribe();
   }, [router, qc]);
   return null;
 }
+
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

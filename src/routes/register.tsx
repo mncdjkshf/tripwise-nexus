@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { Car, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Car, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { requestOtp, verifyOtp, markProfileValidated } from "@/lib/otp.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,49 +19,73 @@ type Stage = "form" | "otp";
 function Register() {
   const nav = useNavigate();
   const [stage, setStage] = useState<Stage>("form");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
-  const generatedOtp = useRef<string>("");
+  const [debugHint, setDebugHint] = useState<string | null>(null);
 
-  const sendOtp = (e: React.FormEvent) => {
+  const sendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!/^\d{10}$/.test(phone.replace(/\D/g, "").slice(-10))) {
       return toast.error("Enter a valid 10-digit phone number");
     }
-    generatedOtp.current = String(Math.floor(100000 + Math.random() * 900000));
-    // Simulated SMS — surface the OTP in the UI so the user can complete the flow
-    toast.success(`OTP sent to +91 ${phone.slice(-10)} — demo code: ${generatedOtp.current}`, { duration: 10000 });
-    setStage("otp");
+    setLoading(true);
+    try {
+      const res = await requestOtp({ data: { identifier: email, channel: "email", email, phone } });
+      if (res.debug_code) {
+        setDebugHint(res.debug_code);
+        toast.success(`OTP sent (demo): ${res.debug_code}`, { duration: 10000 });
+      } else {
+        toast.success(`6-digit code sent to ${email}`);
+      }
+      setStage("otp");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const verifyAndCreate = async () => {
-    if (otp !== generatedOtp.current) return toast.error("Incorrect OTP");
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { display_name: name, phone },
-      },
-    });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Account verified & created");
-    nav({ to: "/ride" });
-  };
-
-  const onGoogle = async () => {
-    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
+    try {
+      const v = await verifyOtp({ data: { identifier: email, code: otp } });
+      if (!v.ok) {
+        setLoading(false);
+        return toast.error(v.reason === "expired" ? "Code expired" : "Incorrect code");
+      }
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { display_name: `${firstName} ${lastName}`.trim(), first_name: firstName, last_name: lastName, phone },
+        },
+      });
+      if (error) throw error;
+      // Persist names + phone on profile, then mark validated.
+      if (data.user) {
+        await supabase
+          .from("profiles")
+          .update({ first_name: firstName, last_name: lastName, phone, display_name: `${firstName} ${lastName}`.trim() })
+          .eq("user_id", data.user.id);
+        await markProfileValidated({ data: { user_id: data.user.id } });
+      }
+      toast.success("Account verified & created");
+      nav({ to: "/ride" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Sign up failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    if (otp.length === 6) verifyAndCreate();
+    if (otp.length === 6 && !loading) verifyAndCreate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp]);
 
@@ -76,42 +100,48 @@ function Register() {
         {stage === "form" ? (
           <>
             <h1 className="mt-6 text-2xl font-bold">Create your account</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Verify your phone, then start riding.</p>
+            <p className="mt-1 text-sm text-muted-foreground">We'll email you a 6-digit code to verify.</p>
 
             <form onSubmit={sendOtp} className="mt-6 space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="name">Full name</Label>
-                <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="phone">Phone number</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="phone" className="pl-9" inputMode="numeric" placeholder="10-digit mobile number" required value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="first">First name</Label>
+                  <Input id="first" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="last">Last name</Label>
+                  <Input id="last" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="email" type="email" className="pl-9" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="phone">Phone number</Label>
+                <Input id="phone" inputMode="numeric" placeholder="10-digit mobile number" required value={phone} onChange={(e) => setPhone(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="password">Password (min 8)</Label>
                 <Input id="password" type="password" minLength={8} required value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
-              <Button type="submit" className="w-full gradient-accent text-accent-foreground">
-                Send OTP
+              <Button type="submit" disabled={loading} className="w-full gradient-accent text-accent-foreground">
+                {loading ? "Sending OTP…" : "Send OTP"}
               </Button>
             </form>
-
-            <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-              <div className="h-px flex-1 bg-border" /> OR <div className="h-px flex-1 bg-border" />
-            </div>
-            <Button variant="outline" className="w-full" onClick={onGoogle}>Continue with Google</Button>
           </>
         ) : (
           <>
-            <h1 className="mt-6 text-2xl font-bold">Verify phone</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Enter the 6-digit code we sent to +91 {phone.slice(-10)}.</p>
+            <h1 className="mt-6 text-2xl font-bold">Verify your email</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Enter the 6-digit code sent to {email}.</p>
+            {debugHint && (
+              <p className="mt-2 rounded-md bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
+                Dev mode: code is <span className="font-mono font-semibold text-foreground">{debugHint}</span>
+              </p>
+            )}
             <div className="mt-6 flex justify-center">
               <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={loading}>
                 <InputOTPGroup>
