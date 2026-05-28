@@ -16,10 +16,18 @@ export type Database = {
     Tables: {
       drivers: {
         Row: {
+          car_number: string | null
           created_at: string
           current_lat: number | null
           current_lng: number | null
+          driving_license: string | null
+          email: string | null
+          full_name: string | null
           id: string
+          is_approved: boolean
+          last_ping: string | null
+          personal_details_json: Json | null
+          phone_number: string | null
           rating: number
           status: Database["public"]["Enums"]["driver_status"]
           total_earnings: number
@@ -32,10 +40,18 @@ export type Database = {
           vehicle_type: string
         }
         Insert: {
+          car_number?: string | null
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
+          driving_license?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
+          is_approved?: boolean
+          last_ping?: string | null
+          personal_details_json?: Json | null
+          phone_number?: string | null
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
           total_earnings?: number
@@ -48,10 +64,18 @@ export type Database = {
           vehicle_type?: string
         }
         Update: {
+          car_number?: string | null
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
+          driving_license?: string | null
+          email?: string | null
+          full_name?: string | null
           id?: string
+          is_approved?: boolean
+          last_ping?: string | null
+          personal_details_json?: Json | null
+          phone_number?: string | null
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
           total_earnings?: number
@@ -65,12 +89,48 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_verifications: {
+        Row: {
+          channel: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          identifier: string
+          otp_code: string
+          user_id: string | null
+        }
+        Insert: {
+          channel?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          identifier: string
+          otp_code: string
+          user_id?: string | null
+        }
+        Update: {
+          channel?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          identifier?: string
+          otp_code?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          first_name: string | null
           id: string
+          is_validated: boolean
+          last_name: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -79,7 +139,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          first_name?: string | null
           id?: string
+          is_validated?: boolean
+          last_name?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -88,7 +151,10 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          first_name?: string | null
           id?: string
+          is_validated?: boolean
+          last_name?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -193,7 +259,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      drivers_public: {
+        Row: {
+          car_number: string | null
+          current_lat: number | null
+          current_lng: number | null
+          full_name: string | null
+          id: string | null
+          is_approved: boolean | null
+          last_ping: string | null
+          rating: number | null
+          status: Database["public"]["Enums"]["driver_status"] | null
+          user_id: string | null
+          vehicle_make: string | null
+          vehicle_model: string | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          car_number?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          full_name?: string | null
+          id?: string | null
+          is_approved?: boolean | null
+          last_ping?: string | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["driver_status"] | null
+          user_id?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          car_number?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          full_name?: string | null
+          id?: string | null
+          is_approved?: boolean | null
+          last_ping?: string | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["driver_status"] | null
+          user_id?: string | null
+          vehicle_make?: string | null
+          vehicle_model?: string | null
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
