@@ -21,7 +21,7 @@ export function loadGoogleMaps(): Promise<typeof google> {
 
     window.__initGmaps = () => resolve(window.google);
     const s = document.createElement("script");
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places&callback=__initGmaps${channel ? `&channel=${channel}` : ""}`;
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=places,geometry&callback=__initGmaps${channel ? `&channel=${channel}` : ""}`;
     s.async = true;
     s.onerror = () => reject(new Error("Failed to load Google Maps"));
     document.head.appendChild(s);
