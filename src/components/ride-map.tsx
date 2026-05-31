@@ -1,5 +1,7 @@
 import { memo, useEffect, useRef } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { loadGoogleMaps } from "@/lib/maps";
+import { computeRoute } from "@/lib/routes.functions";
 
 type LatLng = { lat: number; lng: number };
 
@@ -26,8 +28,8 @@ function RideMapBase({
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
-  const directionsRef = useRef<google.maps.DirectionsRenderer | null>(null);
-  const directionsServiceRef = useRef<google.maps.DirectionsService | null>(null);
+  const polylineRef = useRef<google.maps.Polyline | null>(null);
+  const fetchRoute = useServerFn(computeRoute);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +43,6 @@ function RideMapBase({
           gestureHandling: "greedy",
           styles: darkMapStyle,
         });
-        directionsServiceRef.current = new g.maps.DirectionsService();
       })
       .catch((e) => console.error(e));
     return () => { cancelled = true; };
@@ -74,50 +75,37 @@ function RideMapBase({
     if (driver) add(driver, "#fbbf24", "D");
     drivers?.forEach((d) => add(d, "#60a5fa"));
 
-    // Road-routing via Directions API
-    if (pickup && dropoff && directionsServiceRef.current) {
-      // Clean any previous renderer
-      directionsRef.current?.setMap(null);
-      const renderer = new google.maps.DirectionsRenderer({
-        suppressMarkers: true,
-        preserveViewport: false,
-        polylineOptions: {
-          strokeColor: "#86efac",
-          strokeOpacity: 0.9,
-          strokeWeight: 5,
-        },
-      });
-      renderer.setMap(map);
-      directionsRef.current = renderer;
+    // Road-routing via Routes API (server-side, through Lovable gateway)
+    let cancelled = false;
+    if (pickup && dropoff) {
+      polylineRef.current?.setMap(null);
+      polylineRef.current = null;
 
-      directionsServiceRef.current.route(
-        {
-          origin: pickup,
-          destination: dropoff,
-          travelMode: google.maps.TravelMode.DRIVING,
-          provideRouteAlternatives: false,
-        },
-        (result, status) => {
-          if (status === google.maps.DirectionsStatus.OK && result) {
-            renderer.setDirections(result);
-            const leg = result.routes[0]?.legs[0];
-            if (leg?.distance && leg?.duration && onRoute) {
-              onRoute({
-                distanceMeters: leg.distance.value,
-                durationSeconds: leg.duration.value,
-              });
-            }
-          } else {
-            console.error("Route failed:", status);
-            // Fallback: fit bounds so user still sees both points
-            if (markersRef.current.length > 1) map.fitBounds(bounds, 80);
-          }
-        },
-      );
+      fetchRoute({ data: { origin: pickup, destination: dropoff } })
+        .then((info) => {
+          if (cancelled || !mapRef.current) return;
+          const path = google.maps.geometry.encoding.decodePath(info.encodedPolyline);
+          const line = new google.maps.Polyline({
+            path,
+            strokeColor: "#86efac",
+            strokeOpacity: 0.95,
+            strokeWeight: 5,
+            map: mapRef.current,
+          });
+          polylineRef.current = line;
+          const b = new google.maps.LatLngBounds();
+          path.forEach((p) => b.extend(p));
+          markersRef.current.forEach((m) => { const p = m.getPosition(); if (p) b.extend(p); });
+          mapRef.current.fitBounds(b, 80);
+          onRoute?.({ distanceMeters: info.distanceMeters, durationSeconds: info.durationSeconds });
+        })
+        .catch((err) => {
+          console.error("Route failed:", err);
+          if (markersRef.current.length > 1) map.fitBounds(bounds, 80);
+        });
     } else {
-      // No route — cleanup previous render
-      directionsRef.current?.setMap(null);
-      directionsRef.current = null;
+      polylineRef.current?.setMap(null);
+      polylineRef.current = null;
 
       if (markersRef.current.length === 1) {
         map.setCenter(markersRef.current[0].getPosition()!);
@@ -126,7 +114,8 @@ function RideMapBase({
         map.fitBounds(bounds, 80);
       }
     }
-  }, [pickup?.lat, pickup?.lng, dropoff?.lat, dropoff?.lng, driver?.lat, driver?.lng, drivers, onRoute]);
+    return () => { cancelled = true; };
+  }, [pickup?.lat, pickup?.lng, dropoff?.lat, dropoff?.lng, driver?.lat, driver?.lng, drivers, onRoute, fetchRoute]);
 
   return <div ref={ref} className={className ?? "h-full w-full rounded-2xl"} />;
 }
