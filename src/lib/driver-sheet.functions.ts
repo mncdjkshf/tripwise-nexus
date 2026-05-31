@@ -25,16 +25,20 @@ const DriverRowSchema = z.object({
 // Required app-level secret:
 //   - DRIVER_APPLICATIONS_SHEET_ID  (the spreadsheet ID)
 //   - DRIVER_APPLICATIONS_SHEET_TAB (optional, defaults to "Sheet1")
+// Auto-created sheet — change via env if you ever need to move it.
+const DEFAULT_SHEET_ID = "1upNzVjj9XlBJdixC4ppGvFKk1puTOcOZfORosi_5aN0";
+const DEFAULT_SHEET_TAB = "Applications";
+
 export const syncDriverToSheet = createServerFn({ method: "POST" })
   .inputValidator((input) => DriverRowSchema.parse(input))
   .handler(async ({ data }) => {
-    const sheetId = process.env.DRIVER_APPLICATIONS_SHEET_ID;
-    const sheetTab = process.env.DRIVER_APPLICATIONS_SHEET_TAB || "Sheet1";
+    const sheetId = process.env.DRIVER_APPLICATIONS_SHEET_ID || DEFAULT_SHEET_ID;
+    const sheetTab = process.env.DRIVER_APPLICATIONS_SHEET_TAB || DEFAULT_SHEET_TAB;
     const lovableKey = process.env.LOVABLE_API_KEY;
     const connectorKey = process.env.GOOGLE_SHEETS_API_KEY;
 
-    if (!sheetId || !lovableKey || !connectorKey) {
-      console.warn("[driver-sheet] Sheets sync skipped — missing credentials/sheet id");
+    if (!lovableKey || !connectorKey) {
+      console.warn("[driver-sheet] Sheets sync skipped — connector not linked");
       return { synced: false, reason: "not_configured" as const };
     }
 
