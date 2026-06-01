@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      driver_locations: {
+        Row: {
+          driver_id: string
+          heading: number | null
+          lat: number
+          lng: number
+          speed: number | null
+          updated_at: string
+        }
+        Insert: {
+          driver_id: string
+          heading?: number | null
+          lat: number
+          lng: number
+          speed?: number | null
+          updated_at?: string
+        }
+        Update: {
+          driver_id?: string
+          heading?: number | null
+          lat?: number
+          lng?: number
+          speed?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       drivers: {
         Row: {
           car_number: string | null
@@ -89,39 +116,6 @@ export type Database = {
         }
         Relationships: []
       }
-      otp_verifications: {
-        Row: {
-          channel: string
-          consumed_at: string | null
-          created_at: string
-          expires_at: string
-          id: string
-          identifier: string
-          otp_code: string
-          user_id: string | null
-        }
-        Insert: {
-          channel?: string
-          consumed_at?: string | null
-          created_at?: string
-          expires_at: string
-          id?: string
-          identifier: string
-          otp_code: string
-          user_id?: string | null
-        }
-        Update: {
-          channel?: string
-          consumed_at?: string | null
-          created_at?: string
-          expires_at?: string
-          id?: string
-          identifier?: string
-          otp_code?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -161,12 +155,84 @@ export type Database = {
         }
         Relationships: []
       }
+      ride_offers: {
+        Row: {
+          driver_id: string
+          expires_at: string
+          id: string
+          offered_at: string
+          responded_at: string | null
+          ride_id: string
+          status: string
+        }
+        Insert: {
+          driver_id: string
+          expires_at: string
+          id?: string
+          offered_at?: string
+          responded_at?: string | null
+          ride_id: string
+          status?: string
+        }
+        Update: {
+          driver_id?: string
+          expires_at?: string
+          id?: string
+          offered_at?: string
+          responded_at?: string | null
+          ride_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_offers_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ride_otp: {
+        Row: {
+          code: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          ride_id: string
+        }
+        Insert: {
+          code: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          ride_id: string
+        }
+        Update: {
+          code?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          ride_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_otp_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: true
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rides: {
         Row: {
           accepted_at: string | null
+          arrived_at: string | null
           cancelled_at: string | null
           completed_at: string | null
           created_at: string
+          current_offer_driver_id: string | null
           distance_km: number
           driver_id: string | null
           dropoff_address: string
@@ -175,10 +241,12 @@ export type Database = {
           duration_min: number
           fare: number
           id: string
+          offer_expires_at: string | null
           pickup_address: string
           pickup_lat: number
           pickup_lng: number
           rating: number | null
+          rejected_driver_ids: string[]
           requested_at: string
           ride_type: Database["public"]["Enums"]["ride_type"]
           rider_id: string
@@ -188,9 +256,11 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          arrived_at?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           created_at?: string
+          current_offer_driver_id?: string | null
           distance_km?: number
           driver_id?: string | null
           dropoff_address: string
@@ -199,10 +269,12 @@ export type Database = {
           duration_min?: number
           fare?: number
           id?: string
+          offer_expires_at?: string | null
           pickup_address: string
           pickup_lat: number
           pickup_lng: number
           rating?: number | null
+          rejected_driver_ids?: string[]
           requested_at?: string
           ride_type?: Database["public"]["Enums"]["ride_type"]
           rider_id: string
@@ -212,9 +284,11 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          arrived_at?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           created_at?: string
+          current_offer_driver_id?: string | null
           distance_km?: number
           driver_id?: string | null
           dropoff_address?: string
@@ -223,10 +297,12 @@ export type Database = {
           duration_min?: number
           fare?: number
           id?: string
+          offer_expires_at?: string | null
           pickup_address?: string
           pickup_lat?: number
           pickup_lng?: number
           rating?: number | null
+          rejected_driver_ids?: string[]
           requested_at?: string
           ride_type?: Database["public"]["Enums"]["ride_type"]
           rider_id?: string
@@ -327,6 +403,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+        | "no_drivers_available"
       ride_type: "economy" | "premium" | "bike" | "suv"
     }
     CompositeTypes: {
@@ -464,6 +541,7 @@ export const Constants = {
         "in_progress",
         "completed",
         "cancelled",
+        "no_drivers_available",
       ],
       ride_type: ["economy", "premium", "bike", "suv"],
     },
