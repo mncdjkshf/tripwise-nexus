@@ -50,11 +50,12 @@ async function offerToNextDriver(supabase: any, rideId: string) {
   if (drvErr) throw new Error(drvErr.message);
 
   const pickup = { lat: ride.pickup_lat as number, lng: ride.pickup_lng as number };
-  const ranked = (candidates ?? [])
-    .filter((d) => !rejected.includes(d.user_id as string))
+  type Candidate = { user_id: string; current_lat: number; current_lng: number };
+  const ranked = ((candidates ?? []) as Candidate[])
+    .filter((d) => !rejected.includes(d.user_id))
     .map((d) => ({
-      driver_id: d.user_id as string,
-      km: haversineKm(pickup, { lat: d.current_lat as number, lng: d.current_lng as number }),
+      driver_id: d.user_id,
+      km: haversineKm(pickup, { lat: d.current_lat, lng: d.current_lng }),
     }))
     .filter((d) => d.km <= MAX_RADIUS_KM)
     .sort((a, b) => a.km - b.km);
