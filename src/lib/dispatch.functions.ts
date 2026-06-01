@@ -16,10 +16,8 @@ function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: num
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-async function offerToNextDriver(
-  supabase: ReturnType<typeof import("@supabase/supabase-js").createClient>,
-  rideId: string,
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function offerToNextDriver(supabase: any, rideId: string) {
   // Re-load ride
   const { data: ride, error: rideErr } = await supabase
     .from("rides")
