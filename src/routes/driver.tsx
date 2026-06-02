@@ -78,6 +78,38 @@ function DriverDashboard() {
     toast.success("Ride accepted");
   };
 
+  const reject = async (ride: Ride) => {
+    if (!user) return;
+    const current = (ride.rejected_driver_ids ?? []) as string[];
+    if (current.includes(user.id)) {
+      setRequests((rs) => rs.filter((r) => r.id !== ride.id));
+      return;
+    }
+    const { error } = await supabase
+      .from("rides")
+      .update({ rejected_driver_ids: [...current, user.id] })
+      .eq("id", ride.id)
+      .is("driver_id", null);
+    if (error) return toast.error(error.message);
+    setRequests((rs) => rs.filter((r) => r.id !== ride.id));
+    toast.message("Request declined");
+  };
+
+  const toggleBusy = async () => {
+    if (!driver) return;
+    const next = driver.status === "on_ride" ? "online" : "on_ride";
+    const { data, error } = await supabase
+      .from("drivers")
+      .update({ status: next })
+      .eq("user_id", driver.user_id)
+      .select()
+      .single();
+    if (error) return toast.error(error.message);
+    setDriver(data);
+    toast.success(next === "on_ride" ? "Marked as busy" : "You're available again");
+  };
+
+
   const updateStatus = async (status: Ride["status"]) => {
     if (!currentRide) return;
     const patch: Partial<Ride> = { status };
@@ -98,11 +130,25 @@ function DriverDashboard() {
         <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-5">
           <div>
             <p className="text-xs text-muted-foreground">Driver mode</p>
-            <p className="mt-1 text-xl font-bold">{driver.status === "online" || driver.status === "on_ride" ? "You're online" : "You're offline"}</p>
+            <p className="mt-1 text-xl font-bold">
+              {driver.status === "offline" ? "You're offline" : driver.status === "on_ride" ? "You're busy" : "You're online"}
+            </p>
             <p className="text-xs text-muted-foreground">{driver.vehicle_make} {driver.vehicle_model} · {driver.vehicle_plate}</p>
           </div>
-          <Switch checked={driver.status !== "offline"} onCheckedChange={setOnline} />
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant={driver.status === "on_ride" ? "default" : "outline"}
+              size="sm"
+              onClick={toggleBusy}
+              disabled={driver.status === "offline"}
+            >
+              {driver.status === "on_ride" ? "Busy" : "Mark busy"}
+            </Button>
+            <Switch checked={driver.status !== "offline"} onCheckedChange={setOnline} />
+          </div>
         </div>
+
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Stat label="Rides" value={driver.total_rides} />
@@ -126,20 +172,27 @@ function DriverDashboard() {
           <div>
             <h2 className="mb-3 text-lg font-semibold">Incoming requests</h2>
             {driver.status === "offline" && <p className="text-sm text-muted-foreground">Go online to receive requests.</p>}
-            {driver.status !== "offline" && requests.length === 0 && (
+            {driver.status === "on_ride" && <p className="text-sm text-muted-foreground">You're marked busy. Tap "Busy" again to start receiving requests.</p>}
+            {driver.status === "online" && requests.length === 0 && (
               <p className="text-sm text-muted-foreground">No requests yet. Hang tight.</p>
             )}
-            <div className="space-y-2">
-              {requests.map((r) => (
-                <div key={r.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4">
-                  <div>
-                    <p className="text-sm font-semibold">{formatINR(r.fare)} · {r.distance_km} km · {r.ride_type}</p>
-                    <p className="text-xs text-muted-foreground">{r.pickup_address} → {r.dropoff_address}</p>
+            {driver.status === "online" && (
+              <div className="space-y-2">
+                {requests.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4">
+                    <div>
+                      <p className="text-sm font-semibold">{formatINR(r.fare)} · {r.distance_km} km · {r.ride_type}</p>
+                      <p className="text-xs text-muted-foreground">{r.pickup_address} → {r.dropoff_address}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => reject(r)}>Reject</Button>
+                      <Button size="sm" onClick={() => accept(r)} className="gradient-accent text-accent-foreground">Accept</Button>
+                    </div>
                   </div>
-                  <Button onClick={() => accept(r)} className="gradient-accent text-accent-foreground">Accept</Button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
           </div>
         )}
       </div>
