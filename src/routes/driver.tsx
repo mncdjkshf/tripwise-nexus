@@ -172,20 +172,27 @@ function DriverDashboard() {
           <div>
             <h2 className="mb-3 text-lg font-semibold">Incoming requests</h2>
             {driver.status === "offline" && <p className="text-sm text-muted-foreground">Go online to receive requests.</p>}
-            {driver.status !== "offline" && requests.length === 0 && (
+            {driver.status === "on_ride" && <p className="text-sm text-muted-foreground">You're marked busy. Tap "Busy" again to start receiving requests.</p>}
+            {driver.status === "online" && requests.length === 0 && (
               <p className="text-sm text-muted-foreground">No requests yet. Hang tight.</p>
             )}
-            <div className="space-y-2">
-              {requests.map((r) => (
-                <div key={r.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4">
-                  <div>
-                    <p className="text-sm font-semibold">{formatINR(r.fare)} · {r.distance_km} km · {r.ride_type}</p>
-                    <p className="text-xs text-muted-foreground">{r.pickup_address} → {r.dropoff_address}</p>
+            {driver.status === "online" && (
+              <div className="space-y-2">
+                {requests.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-4">
+                    <div>
+                      <p className="text-sm font-semibold">{formatINR(r.fare)} · {r.distance_km} km · {r.ride_type}</p>
+                      <p className="text-xs text-muted-foreground">{r.pickup_address} → {r.dropoff_address}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => reject(r)}>Reject</Button>
+                      <Button size="sm" onClick={() => accept(r)} className="gradient-accent text-accent-foreground">Accept</Button>
+                    </div>
                   </div>
-                  <Button onClick={() => accept(r)} className="gradient-accent text-accent-foreground">Accept</Button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
           </div>
         )}
       </div>
