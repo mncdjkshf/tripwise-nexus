@@ -78,6 +78,38 @@ function DriverDashboard() {
     toast.success("Ride accepted");
   };
 
+  const reject = async (ride: Ride) => {
+    if (!user) return;
+    const current = (ride.rejected_driver_ids ?? []) as string[];
+    if (current.includes(user.id)) {
+      setRequests((rs) => rs.filter((r) => r.id !== ride.id));
+      return;
+    }
+    const { error } = await supabase
+      .from("rides")
+      .update({ rejected_driver_ids: [...current, user.id] })
+      .eq("id", ride.id)
+      .is("driver_id", null);
+    if (error) return toast.error(error.message);
+    setRequests((rs) => rs.filter((r) => r.id !== ride.id));
+    toast.message("Request declined");
+  };
+
+  const toggleBusy = async () => {
+    if (!driver) return;
+    const next = driver.status === "on_ride" ? "online" : "on_ride";
+    const { data, error } = await supabase
+      .from("drivers")
+      .update({ status: next })
+      .eq("user_id", driver.user_id)
+      .select()
+      .single();
+    if (error) return toast.error(error.message);
+    setDriver(data);
+    toast.success(next === "on_ride" ? "Marked as busy" : "You're available again");
+  };
+
+
   const updateStatus = async (status: Ride["status"]) => {
     if (!currentRide) return;
     const patch: Partial<Ride> = { status };
