@@ -123,7 +123,7 @@ function Home() {
       <footer className="border-t border-border/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} Tahu cab's</span>
-          <span>Built on Lovable</span>
+          <span>{"\n"}</span>
         </div>
       </footer>
     </div>
