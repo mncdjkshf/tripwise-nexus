@@ -130,11 +130,25 @@ function DriverDashboard() {
         <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-5">
           <div>
             <p className="text-xs text-muted-foreground">Driver mode</p>
-            <p className="mt-1 text-xl font-bold">{driver.status === "online" || driver.status === "on_ride" ? "You're online" : "You're offline"}</p>
+            <p className="mt-1 text-xl font-bold">
+              {driver.status === "offline" ? "You're offline" : driver.status === "on_ride" ? "You're busy" : "You're online"}
+            </p>
             <p className="text-xs text-muted-foreground">{driver.vehicle_make} {driver.vehicle_model} · {driver.vehicle_plate}</p>
           </div>
-          <Switch checked={driver.status !== "offline"} onCheckedChange={setOnline} />
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant={driver.status === "on_ride" ? "default" : "outline"}
+              size="sm"
+              onClick={toggleBusy}
+              disabled={driver.status === "offline"}
+            >
+              {driver.status === "on_ride" ? "Busy" : "Mark busy"}
+            </Button>
+            <Switch checked={driver.status !== "offline"} onCheckedChange={setOnline} />
+          </div>
         </div>
+
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Stat label="Rides" value={driver.total_rides} />
