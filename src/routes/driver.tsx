@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { NavBar } from "@/components/nav-bar";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/format";
+import { getDriverEarnings } from "@/lib/ride-lifecycle.functions";
 import type { Database } from "@/integrations/supabase/types";
 
 type Driver = Database["public"]["Tables"]["drivers"]["Row"];
@@ -23,6 +26,13 @@ function DriverDashboard() {
   const [driver, setDriver] = useState<Driver | null>(null);
   const [requests, setRequests] = useState<Ride[]>([]);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
+  const earningsFn = useServerFn(getDriverEarnings);
+  const earnings = useQuery({
+    queryKey: ["driver-earnings", user?.id],
+    queryFn: () => earningsFn(),
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
 
   useEffect(() => { if (!loading && !user) nav({ to: "/login" }); }, [loading, user, nav]);
   useEffect(() => { if (!loading && user && !roles.includes("driver")) nav({ to: "/become-driver" }); }, [loading, user, roles, nav]);
@@ -150,10 +160,11 @@ function DriverDashboard() {
         </div>
 
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Stat label="Rides" value={driver.total_rides} />
-          <Stat label="Earnings" value={formatINR(driver.total_earnings)} />
-          <Stat label="Rating" value={`${Number(driver.rating).toFixed(2)} ★`} />
+        <div className="grid gap-4 sm:grid-cols-4">
+          <Stat label="Today" value={formatINR(earnings.data?.today ?? 0)} sub={`${earnings.data?.todayTrips ?? 0} trips`} />
+          <Stat label="This week" value={formatINR(earnings.data?.week ?? 0)} sub={`${earnings.data?.weekTrips ?? 0} trips`} />
+          <Stat label="Lifetime" value={formatINR(earnings.data?.total ?? 0)} sub={`${earnings.data?.totalTrips ?? 0} trips`} />
+          <Stat label="Rating" value={`${Number(driver.rating).toFixed(2)} ★`} sub="from riders" />
         </div>
 
         {currentRide ? (
@@ -200,11 +211,12 @@ function DriverDashboard() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 text-xl font-bold">{value}</p>
+      {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
