@@ -193,6 +193,49 @@ function Track() {
           />
         </div>
       </div>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Cancel this ride?</DialogTitle></DialogHeader>
+          <Textarea
+            placeholder="Tell us why (e.g., changed plans, long wait)…"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            maxLength={500}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelOpen(false)}>Keep ride</Button>
+            <Button variant="destructive" onClick={submitCancel} disabled={submitting}>
+              {submitting ? "Cancelling…" : "Cancel ride"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={rateOpen} onOpenChange={setRateOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>How was your ride?</DialogTitle></DialogHeader>
+          <div className="flex justify-center gap-2 py-3">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button key={n} type="button" onClick={() => setStars(n)} aria-label={`${n} stars`}>
+                <Star className={`h-8 w-8 ${n <= stars ? "fill-accent text-accent" : "text-muted-foreground"}`} />
+              </button>
+            ))}
+          </div>
+          <Textarea
+            placeholder="Leave a comment (optional)"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            maxLength={500}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setRated(true); setRateOpen(false); }}>Skip</Button>
+            <Button onClick={submitRating} disabled={submitting} className="gradient-accent text-accent-foreground">
+              {submitting ? "Submitting…" : "Submit rating"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
