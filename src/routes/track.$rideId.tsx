@@ -88,8 +88,46 @@ function Track() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [driverTarget?.lat, driverTarget?.lng]);
 
-  const cancel = async () => {
-    await supabase.from("rides").update({ status: "cancelled", cancelled_at: new Date().toISOString() }).eq("id", rideId);
+  const cancelFn = useServerFn(cancelRide);
+  const rateFn = useServerFn(rateRide);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [rateOpen, setRateOpen] = useState(false);
+  const [stars, setStars] = useState(5);
+  const [comment, setComment] = useState("");
+  const [rated, setRated] = useState(false);
+
+  // Prompt rating once when the ride completes
+  useEffect(() => {
+    if (ride?.status === "completed" && !rated) setRateOpen(true);
+  }, [ride?.status, rated]);
+
+  const submitCancel = async () => {
+    setSubmitting(true);
+    try {
+      await cancelFn({ data: { rideId, reason: reason.trim() || "No reason given" } });
+      toast.success("Ride cancelled");
+      setCancelOpen(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to cancel");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const submitRating = async () => {
+    setSubmitting(true);
+    try {
+      await rateFn({ data: { rideId, stars, comment: comment.trim() || undefined } });
+      toast.success("Thanks for the feedback!");
+      setRated(true);
+      setRateOpen(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to rate");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!ride) return <div className="min-h-screen"><NavBar /><div className="p-10 text-muted-foreground">Loading…</div></div>;
@@ -124,14 +162,26 @@ function Track() {
                 );
               })}
             </ol>
-            {ride.status === "cancelled" && <p className="mt-3 text-sm text-destructive">Ride cancelled</p>}
+            {ride.status === "cancelled" && (
+              <div className="mt-3 space-y-1">
+                <p className="text-sm text-destructive">Ride cancelled</p>
+                {ride.cancellation_reason && (
+                  <p className="text-xs text-muted-foreground">Reason: {ride.cancellation_reason}</p>
+                )}
+              </div>
+            )}
           </div>
 
           {["requested", "accepted", "arriving"].includes(ride.status) && (
-            <Button variant="destructive" className="w-full" onClick={cancel}>Cancel ride</Button>
+            <Button variant="destructive" className="w-full" onClick={() => setCancelOpen(true)}>Cancel ride</Button>
           )}
           {ride.status === "completed" && (
-            <Button asChild className="w-full gradient-accent text-accent-foreground"><Link to="/ride">Book another</Link></Button>
+            <>
+              <Button variant="outline" className="w-full" onClick={() => setRateOpen(true)}>
+                <Star className="mr-2 h-4 w-4" /> Rate your driver
+              </Button>
+              <Button asChild className="w-full gradient-accent text-accent-foreground"><Link to="/ride">Book another</Link></Button>
+            </>
           )}
         </div>
 
