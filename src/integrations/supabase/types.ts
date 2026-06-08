@@ -155,6 +155,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ratings: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          ratee_id: string
+          rater_id: string
+          ride_id: string
+          role: string
+          stars: number
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          ratee_id: string
+          rater_id: string
+          ride_id: string
+          role: string
+          stars: number
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          ratee_id?: string
+          rater_id?: string
+          ride_id?: string
+          role?: string
+          stars?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ratings_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ride_offers: {
         Row: {
           driver_id: string
@@ -225,11 +266,48 @@ export type Database = {
           },
         ]
       }
+      ride_status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_status: Database["public"]["Enums"]["ride_status"] | null
+          id: string
+          ride_id: string
+          to_status: Database["public"]["Enums"]["ride_status"]
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: Database["public"]["Enums"]["ride_status"] | null
+          id?: string
+          ride_id: string
+          to_status: Database["public"]["Enums"]["ride_status"]
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: Database["public"]["Enums"]["ride_status"] | null
+          id?: string
+          ride_id?: string
+          to_status?: Database["public"]["Enums"]["ride_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ride_status_history_ride_id_fkey"
+            columns: ["ride_id"]
+            isOneToOne: false
+            referencedRelation: "rides"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rides: {
         Row: {
           accepted_at: string | null
           arrived_at: string | null
+          cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           completed_at: string | null
           created_at: string
           current_offer_driver_id: string | null
@@ -257,7 +335,9 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           arrived_at?: string | null
+          cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           completed_at?: string | null
           created_at?: string
           current_offer_driver_id?: string | null
@@ -285,7 +365,9 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           arrived_at?: string | null
+          cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           completed_at?: string | null
           created_at?: string
           current_offer_driver_id?: string | null
