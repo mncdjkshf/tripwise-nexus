@@ -26,6 +26,13 @@ function DriverDashboard() {
   const [driver, setDriver] = useState<Driver | null>(null);
   const [requests, setRequests] = useState<Ride[]>([]);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
+  const earningsFn = useServerFn(getDriverEarnings);
+  const earnings = useQuery({
+    queryKey: ["driver-earnings", user?.id],
+    queryFn: () => earningsFn(),
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
 
   useEffect(() => { if (!loading && !user) nav({ to: "/login" }); }, [loading, user, nav]);
   useEffect(() => { if (!loading && user && !roles.includes("driver")) nav({ to: "/become-driver" }); }, [loading, user, roles, nav]);
