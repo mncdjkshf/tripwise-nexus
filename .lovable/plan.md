@@ -1,84 +1,52 @@
+# Ride-Hailing Full Build — Phased Plan
 
-# Tahu Cabs × Uber Clone — Phased Merge Plan
+The existing app already has: rider booking, dispatch with offers + TTL, driver dashboard (accept/reject/busy), ride-start OTP, live GPS pings, Google Maps + road-following route line, admin route, profiles, user_roles, yellow+blue theme. This plan only adds what's missing.
 
-The Uber clone backend (Mongo/Express/Socket.IO) is discarded — your stack is TanStack Start + Supabase. Only the React UI components are reusable, and they'll be ported in Phase 3. This plan covers **Phase 1 only**; Phases 2 and 3 follow after Phase 1 ships.
+## Phase 1 — Cancellation, Ratings, Earnings, Animated tracking
+**Migration:**
+- `rides`: add `cancelled_by` (uuid), `cancellation_reason` (text), `cancelled_at` (timestamptz)
+- New `ratings` table (ride_id, rater_id, ratee_id, role, stars 1-5, comment) + GRANTs + RLS
+- New `ride_status_history` table (ride_id, from_status, to_status, changed_by, changed_at) + trigger on `rides` status change
 
----
+**Server fns** (`src/lib/ride-lifecycle.functions.ts`):
+- `cancelRide({rideId, reason})` — rider or driver, sets status='cancelled' + audit fields, frees driver
+- `rateRide({rideId, stars, comment})` — rider rates driver (and reverse)
+- `getDriverEarnings()` — today / week / total / trip count from completed rides
 
-## Phase 1 (this round) — Backend foundation
+**UI:**
+- Rider tracking page: "Cancel ride" button with reason dialog
+- Post-ride: 5-star rating sheet
+- Driver dashboard: earnings cards (Today, Week, Total, Trips)
+- Rider tracking: interpolated driver marker (tween between pings, rotate by heading, car/bike SVG)
 
-Goal: every realtime/dispatch/OTP/GPS feature has a working server contract before any UI is touched.
+## Phase 2 — Notifications + Cancellation realtime
+- New `notifications` table + RLS, realtime publication
+- Toast on driver when rider cancels, toast on rider when driver cancels/arrives
+- `notifyUser` server fn helper
 
-### 1. Database migration
+## Phase 3 — Payments scaffold
+- Migration: `payments`, `transactions`, `wallets`, `wallet_transactions` (all with GRANTs + RLS)
+- `PaymentProvider` interface in `src/lib/payments/provider.ts` with Razorpay + Stripe + Cash stubs
+- Secrets: ask user for `RAZORPAY_KEY_ID` / `STRIPE_SECRET_KEY` only when they're ready (placeholders until then)
+- Server fns: `createPaymentIntent`, `confirmPayment`, `getWallet`, `topUpWallet` (cash path works end-to-end immediately)
+- UI: payment method selector on booking screen, wallet page, post-ride payment confirmation
 
-New tables (Supabase, RLS + GRANTs):
+## Phase 4 — Auth: Google OAuth + Phone OTP
+- Call `supabase--configure_social_auth` for Google (Cloud-managed, no keys needed)
+- Add "Continue with Google" button to `/login` and `/register` via `lovable.auth.signInWithOAuth("google")`
+- `OtpProvider` interface in `src/lib/otp/provider.ts` (Twilio/MSG91/console stubs)
+- `sendPhoneOtp` / `verifyPhoneOtp` server fns + `phone_otp` table with TTL + rate limit (per phone, in-DB)
+- Phone verification step in driver onboarding
 
-- **`driver_locations`** — `driver_id` (PK, FK→drivers.user_id), `lat`, `lng`, `heading`, `speed`, `updated_at`. One row per driver, upserted every 3–5s by driver's `watchPosition`. Realtime publication enabled.
-- **`ride_offers`** — `id`, `ride_id` (FK→rides), `driver_id`, `status` (`pending`/`accepted`/`rejected`/`expired`), `offered_at`, `responded_at`, `expires_at`. Unique on `(ride_id, driver_id)`. Powers sequential dispatch + `rejected_driver_ids` history.
-- **`ride_otp`** — `ride_id` (PK, FK→rides), `code` (4-digit text), `created_at`, `expires_at`, `consumed_at`. Generated when driver arrives, consumed when driver enters code.
-- **Add columns to `rides`**: `current_offer_driver_id`, `offer_expires_at`, `arrived_at`.
+## Out of scope (explicit)
+- Restructuring into `src/modules/*` clean-architecture folders — incompatible with TanStack file routing
+- Express-style REST endpoints — replaced by equivalent `createServerFn` RPCs
+- Backend rate limiting primitive — none exists in stack; per-phone OTP limit only
+- Unzipping the reference server into the repo — used as design reference only
 
-Drop unused `otp_verifications` table (no longer used after earlier OTP removal).
-
-RLS:
-- `driver_locations`: driver can upsert own row; riders can SELECT only the row of their accepted-ride driver.
-- `ride_offers`: driver sees own pending offers; rider sees offers for own ride.
-- `ride_otp`: rider sees own ride's code; driver sees code only after `arrived_at`.
-
-### 2. Server functions (`src/lib/`)
-
-All as `createServerFn` with `requireSupabaseAuth`:
-
-- **`dispatch.functions.ts`**
-  - `requestRideWithDispatch({ rideId })` — finds nearest online approved driver (Haversine on `driver_locations`, filtered by `vehicle_type`, excluding past rejecters), creates a `ride_offers` row with 15s expiry, sets `rides.current_offer_driver_id`.
-  - `respondToOffer({ offerId, accept })` — atomic: if accept, locks ride (`driver_id = me`, status=`accepted`), expires all other offers for that ride; if reject, marks offer rejected and triggers next dispatch.
-  - `expireAndAdvanceOffer({ rideId })` — called by client timer or cron; marks current offer expired and offers to next driver. Max ~5 attempts, then ride goes `no_drivers_available`.
-- **`otp.functions.ts`** (new, replaces the deleted one with a different purpose)
-  - `markArrivedAndGenerateOtp({ rideId })` — driver-only, sets `arrived_at`, generates 4-digit code, inserts `ride_otp`, returns nothing (code only readable by rider via RLS).
-  - `verifyRideOtp({ rideId, code })` — driver-only, single-use, 10-min expiry, sets ride status `in_progress`, `started_at`.
-- **`location.functions.ts`**
-  - `pingDriverLocation({ lat, lng, heading?, speed? })` — driver-only upsert into `driver_locations`. Throttled server-side to 1/sec.
-
-### 3. Realtime channels
-
-Enable Supabase Realtime publication on `driver_locations`, `ride_offers`, `rides`, `ride_otp`. The frontend will subscribe in Phase 2/3 — no UI work this phase.
-
-### 4. Cleanup
-
-- Delete legacy `otp_verifications` table + any remaining references.
-- Add `vehicle_type` index on `drivers` and `(status, current_lat, current_lng)` for dispatch query performance.
-
-### 5. Verification
-
-- Hit each server fn via `stack_modern--invoke-server-function` with a seeded test driver/rider.
-- Confirm realtime publication via `supabase--read_query` on `pg_publication_tables`.
-
----
-
-## Phase 2 (next round) — Driver dashboard + live GPS
-
-- Port `CaptainHome` + `CaptainDetails` → `DriverDashboard` (TSX, Tahu tokens).
-- Driver online toggle → starts `watchPosition` → calls `pingDriverLocation`.
-- Realtime subscription on `ride_offers` where `driver_id = me AND status='pending'` → shows `RidePopUp` (ported).
-- Accept/Reject buttons call `respondToOffer`.
-- Active-trip view shows pickup route via existing `computeRoute` server fn.
-
-## Phase 3 (final round) — Rider ride flow UI
-
-- Port `LookingForDriver`, `WaitingForDriver`, `ConfirmRide`, `Riding` components to TSX with Tahu tokens.
-- Rider sees driver's live marker (subscription to `driver_locations` for assigned driver).
-- Rider sees OTP code after driver marks arrived.
-- Privacy gates: hide driver GPS until ride accepted; stop subscription on `completed`/`cancelled`.
-
----
-
-## Explicit non-goals
-
-- ❌ No `apps/rider-app`, `apps/driver-dashboard`, `apps/admin-dashboard` split — TanStack Start is a single app; we organize by `src/routes/` + feature folders.
-- ❌ No admin dashboard expansion (existing `/admin` stub stays).
-- ❌ No port of Uber Node/Mongo/Express/Socket.IO backend — replaced entirely by Supabase + server functions.
-- ❌ No Uber visual style — re-skin only the components that fill genuine gaps, using your existing Tahu design tokens.
-
----
-
-**Phase 1 deliverable**: migration + 6 server functions + realtime publications, all verified end-to-end via direct invocation. No UI changes this round.
+## Technical notes
+- All new tables: `GRANT` block + `ENABLE ROW LEVEL SECURITY` + policies in same migration
+- Server fns use `requireSupabaseAuth`; admin client only inside `.handler()` via dynamic import
+- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE` for `rides`, `notifications`, `ratings`
+- Animated marker: requestAnimationFrame tween, no library
+- No straight-line routes — keep existing `computeRoute` Google Routes API call
