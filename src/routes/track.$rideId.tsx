@@ -1,10 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
+import { Star } from "lucide-react";
 import { NavBar } from "@/components/nav-bar";
 import { RideMap } from "@/components/ride-map";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/format";
+import { cancelRide, rateRide } from "@/lib/ride-lifecycle.functions";
 import type { Database } from "@/integrations/supabase/types";
 
 type Ride = Database["public"]["Tables"]["rides"]["Row"];
