@@ -211,11 +211,12 @@ function DriverDashboard() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
       <p className="mt-1 text-xl font-bold">{value}</p>
+      {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
     </div>
   );
 }
