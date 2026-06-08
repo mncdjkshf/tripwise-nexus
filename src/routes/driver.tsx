@@ -160,10 +160,11 @@ function DriverDashboard() {
         </div>
 
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Stat label="Rides" value={driver.total_rides} />
-          <Stat label="Earnings" value={formatINR(driver.total_earnings)} />
-          <Stat label="Rating" value={`${Number(driver.rating).toFixed(2)} ★`} />
+        <div className="grid gap-4 sm:grid-cols-4">
+          <Stat label="Today" value={formatINR(earnings.data?.today ?? 0)} sub={`${earnings.data?.todayTrips ?? 0} trips`} />
+          <Stat label="This week" value={formatINR(earnings.data?.week ?? 0)} sub={`${earnings.data?.weekTrips ?? 0} trips`} />
+          <Stat label="Lifetime" value={formatINR(earnings.data?.total ?? 0)} sub={`${earnings.data?.totalTrips ?? 0} trips`} />
+          <Stat label="Rating" value={`${Number(driver.rating).toFixed(2)} ★`} sub="from riders" />
         </div>
 
         {currentRide ? (
