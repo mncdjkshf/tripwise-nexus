@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RideRouteImport } from './routes/ride'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
@@ -19,6 +20,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TrackRideIdRouteImport } from './routes/track.$rideId'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RideRoute = RideRouteImport.update({
   id: '/ride',
   path: '/ride',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/ride': typeof RideRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track/$rideId': typeof TrackRideIdRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/ride': typeof RideRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track/$rideId': typeof TrackRideIdRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/ride': typeof RideRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track/$rideId': typeof TrackRideIdRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/ride'
+    | '/sitemap.xml'
     | '/track/$rideId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/ride'
+    | '/sitemap.xml'
     | '/track/$rideId'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/ride'
+    | '/sitemap.xml'
     | '/track/$rideId'
   fileRoutesById: FileRoutesById
 }
@@ -144,11 +156,19 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   RideRoute: typeof RideRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackRideIdRoute: typeof TrackRideIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ride': {
       id: '/ride'
       path: '/ride'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   RideRoute: RideRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackRideIdRoute: TrackRideIdRoute,
 }
 export const routeTree = rootRouteImport
