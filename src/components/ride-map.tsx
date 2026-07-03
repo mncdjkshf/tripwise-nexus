@@ -144,8 +144,30 @@ function RideMapBase({
           onRoute?.({ distanceMeters: info.distanceMeters, durationSeconds: info.durationSeconds });
         })
         .catch((err) => {
-          console.error("Route failed:", err);
+          console.error("Route failed, drawing straight line:", err);
+          if (cancelled || !mapRef.current) return;
+          // Fallback: straight-line polyline between pickup and dropoff
+          polylineRef.current = new google.maps.Polyline({
+            path: [pickup, dropoff],
+            strokeColor: "#0a0a0a",
+            strokeOpacity: 0,
+            strokeWeight: 0,
+            icons: [{
+              icon: { path: "M 0,-1 0,1", strokeOpacity: 1, strokeColor: "#0a0a0a", scale: 3 },
+              offset: "0", repeat: "12px",
+            }],
+            map: mapRef.current,
+          });
+          // Rough haversine distance for fare fallback
+          const toRad = (d: number) => (d * Math.PI) / 180;
+          const R = 6371000;
+          const dLat = toRad(dropoff.lat - pickup.lat);
+          const dLng = toRad(dropoff.lng - pickup.lng);
+          const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(pickup.lat)) * Math.cos(toRad(dropoff.lat)) * Math.sin(dLng / 2) ** 2;
+          const distanceMeters = Math.round(2 * R * Math.asin(Math.sqrt(a)));
+          const durationSeconds = Math.round((distanceMeters / 1000) * 120); // ~30 km/h avg
           if (pinMarkersRef.current.length > 1) map.fitBounds(bounds, 80);
+          onRoute?.({ distanceMeters, durationSeconds });
         });
     } else {
       polylineRef.current?.setMap(null);
