@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /driver
+Disallow: /become-driver
+Disallow: /history
+Disallow: /ride
+Disallow: /track/
+
+Sitemap: https://tahcabs.lovable.app/sitemap.xml

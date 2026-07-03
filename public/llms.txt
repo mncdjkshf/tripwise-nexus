@@ -1,0 +1,12 @@
+# TahCabs
+
+> On-demand cab and bike booking with live driver tracking.
+
+TahCabs lets riders book cars and bikes, track drivers live on a map, and pay after the trip. Drivers can register, get verified, and accept ride requests in real time.
+
+## Pages
+
+- [Home](/): Book a ride, see nearby drivers, get fare estimates.
+- [Sign in](/login): Rider and driver sign-in.
+- [Register](/register): Create a new rider account.
+- [Become a driver](/become-driver): Apply to drive on TahCabs.
