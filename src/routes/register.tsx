@@ -35,10 +35,9 @@ function Register() {
 
     setLoading(true);
     try {
-      // Prevent duplicate phone
-      const { data: dupe } = await supabase
-        .from("profiles").select("id").eq("phone", parsed.data.phone).maybeSingle();
-      if (dupe) {
+      // Prevent duplicate phone (uses SECURITY DEFINER RPC — profiles table is not readable to other users)
+      const { data: taken } = await supabase.rpc("is_phone_registered", { _phone: parsed.data.phone });
+      if (taken) {
         setLoading(false);
         return toast.error("Phone number already registered");
       }

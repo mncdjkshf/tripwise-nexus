@@ -43,18 +43,12 @@ export type Database = {
       }
       drivers: {
         Row: {
-          car_number: string | null
           created_at: string
           current_lat: number | null
           current_lng: number | null
-          driving_license: string | null
-          email: string | null
-          full_name: string | null
           id: string
           is_approved: boolean
           last_ping: string | null
-          personal_details_json: Json | null
-          phone_number: string | null
           rating: number
           status: Database["public"]["Enums"]["driver_status"]
           total_earnings: number
@@ -67,18 +61,12 @@ export type Database = {
           vehicle_type: string
         }
         Insert: {
-          car_number?: string | null
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
-          driving_license?: string | null
-          email?: string | null
-          full_name?: string | null
           id?: string
           is_approved?: boolean
           last_ping?: string | null
-          personal_details_json?: Json | null
-          phone_number?: string | null
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
           total_earnings?: number
@@ -91,18 +79,12 @@ export type Database = {
           vehicle_type?: string
         }
         Update: {
-          car_number?: string | null
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
-          driving_license?: string | null
-          email?: string | null
-          full_name?: string | null
           id?: string
           is_approved?: boolean
           last_ping?: string | null
-          personal_details_json?: Json | null
-          phone_number?: string | null
           rating?: number
           status?: Database["public"]["Enums"]["driver_status"]
           total_earnings?: number
@@ -113,6 +95,42 @@ export type Database = {
           vehicle_model?: string | null
           vehicle_plate?: string | null
           vehicle_type?: string
+        }
+        Relationships: []
+      }
+      drivers_private: {
+        Row: {
+          car_number: string | null
+          created_at: string
+          driving_license: string | null
+          email: string | null
+          full_name: string | null
+          personal_details_json: Json | null
+          phone_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          car_number?: string | null
+          created_at?: string
+          driving_license?: string | null
+          email?: string | null
+          full_name?: string | null
+          personal_details_json?: Json | null
+          phone_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          car_number?: string | null
+          created_at?: string
+          driving_license?: string | null
+          email?: string | null
+          full_name?: string | null
+          personal_details_json?: Json | null
+          phone_number?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -419,10 +437,8 @@ export type Database = {
     Views: {
       drivers_public: {
         Row: {
-          car_number: string | null
           current_lat: number | null
           current_lng: number | null
-          full_name: string | null
           id: string | null
           is_approved: boolean | null
           last_ping: string | null
@@ -434,10 +450,8 @@ export type Database = {
           vehicle_type: string | null
         }
         Insert: {
-          car_number?: string | null
           current_lat?: number | null
           current_lng?: number | null
-          full_name?: string | null
           id?: string | null
           is_approved?: boolean | null
           last_ping?: string | null
@@ -449,10 +463,8 @@ export type Database = {
           vehicle_type?: string | null
         }
         Update: {
-          car_number?: string | null
           current_lat?: number | null
           current_lng?: number | null
-          full_name?: string | null
           id?: string | null
           is_approved?: boolean | null
           last_ping?: string | null
@@ -474,6 +486,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_phone_registered: { Args: { _phone: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "driver" | "rider"

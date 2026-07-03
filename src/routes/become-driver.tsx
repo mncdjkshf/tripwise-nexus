@@ -58,19 +58,25 @@ function BecomeDriver() {
 
     const { data: inserted, error: e1 } = await supabase.from("drivers").insert({
       user_id: user.id,
-      full_name: fullName,
-      email,
-      phone_number: cleanPhone,
-      car_number: carNumber,
       vehicle_make: make,
       vehicle_model: model,
       vehicle_plate: carNumber,
       vehicle_type: type,
-      driving_license: license,
-      personal_details_json: personal,
       is_approved: false,
     }).select("id").maybeSingle();
     if (e1) { setSubmitting(false); return toast.error(e1.message); }
+
+    // PII lives in drivers_private (RLS: only self + admin)
+    const { error: ePriv } = await supabase.from("drivers_private").upsert({
+      user_id: user.id,
+      full_name: fullName,
+      email,
+      phone_number: cleanPhone,
+      car_number: carNumber,
+      driving_license: license,
+      personal_details_json: personal,
+    });
+    if (ePriv) { setSubmitting(false); return toast.error(ePriv.message); }
 
     const { error: e2 } = await supabase.from("user_roles").insert({ user_id: user.id, role: "driver" });
     if (e2 && !e2.message.includes("duplicate")) {
