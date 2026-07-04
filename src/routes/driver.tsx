@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  User, FileText, Wallet, LifeBuoy, Car as CarIcon, Settings, History as HistoryIcon,
+  LogOut, ShieldCheck, Clock, XCircle,
+} from "lucide-react";
 import { NavBar } from "@/components/nav-bar";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -10,6 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatINR } from "@/lib/format";
 import { getDriverEarnings } from "@/lib/ride-lifecycle.functions";
+import { getSignedDriverUrl } from "@/lib/driver-storage";
 import type { Database } from "@/integrations/supabase/types";
 
 type Driver = Database["public"]["Tables"]["drivers"]["Row"];
@@ -21,11 +26,13 @@ export const Route = createFileRoute("/driver")({
 });
 
 function DriverDashboard() {
-  const { user, loading, roles } = useAuth();
+  const { user, loading, roles, signOut } = useAuth();
   const nav = useNavigate();
   const [driver, setDriver] = useState<Driver | null>(null);
   const [requests, setRequests] = useState<Ride[]>([]);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [driverInfo, setDriverInfo] = useState<{ full_name: string | null; verification_status: string; profile_photo_url: string | null } | null>(null);
   const earningsFn = useServerFn(getDriverEarnings);
   const earnings = useQuery({
     queryKey: ["driver-earnings", user?.id],
@@ -37,10 +44,16 @@ function DriverDashboard() {
   useEffect(() => { if (!loading && !user) nav({ to: "/login" }); }, [loading, user, nav]);
   useEffect(() => { if (!loading && user && !roles.includes("driver")) nav({ to: "/become-driver" }); }, [loading, user, roles, nav]);
 
-  // Load driver row
+  // Load driver row + private info
   useEffect(() => {
     if (!user) return;
     supabase.from("drivers").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => setDriver(data));
+    supabase.from("drivers_private").select("full_name,verification_status,profile_photo_url").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (data) {
+        setDriverInfo(data);
+        if (data.profile_photo_url) getSignedDriverUrl(data.profile_photo_url).then(setAvatarUrl);
+      }
+    });
   }, [user]);
 
   // Watch open requests + my assigned active ride
@@ -136,7 +149,21 @@ function DriverDashboard() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+        {/* Profile header */}
+        <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-border/60 bg-card p-5">
+          <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-muted">
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : <User className="h-6 w-6 text-muted-foreground" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate text-base font-semibold">{driverInfo?.full_name ?? "Driver"}</p>
+              <VerificationBadge status={driverInfo?.verification_status ?? "pending"} />
+            </div>
+            <p className="text-xs text-muted-foreground">ID · {user?.id.slice(0, 8).toUpperCase()}</p>
+          </div>
+          <Button asChild variant="outline" size="sm"><Link to="/driver-profile">Edit profile</Link></Button>
+        </div>
         <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-5">
           <div>
             <p className="text-xs text-muted-foreground">Driver mode</p>
@@ -206,8 +233,56 @@ function DriverDashboard() {
 
           </div>
         )}
+
+        {/* Dashboard cards */}
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">Your dashboard</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <DashCard to="/driver-profile" icon={User} label="Profile" />
+            <DashCard to="/driver-documents" icon={FileText} label="Documents" />
+            <DashCard to="/history" icon={HistoryIcon} label="Trip history" />
+            <DashCard to="/driver" icon={Wallet} label="Earnings" hint={formatINR(earnings.data?.total ?? 0)} />
+            <DashCard to="/driver" icon={CarIcon} label="Vehicle" hint={driver.vehicle_plate ?? ""} />
+            <DashCard to="/driver" icon={LifeBuoy} label="Support" />
+            <DashCard to="/driver" icon={Settings} label="Settings" />
+            <button
+              onClick={async () => { await signOut(); nav({ to: "/login" }); }}
+              className="flex flex-col items-start gap-2 rounded-2xl border border-border/60 bg-card p-4 text-left transition-colors hover:border-destructive/60"
+            >
+              <span className="grid h-9 w-9 place-items-center rounded-lg bg-destructive/10 text-destructive"><LogOut className="h-4 w-4" /></span>
+              <span className="text-sm font-medium">Log out</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+  );
+}
+
+function DashCard({ to, icon: Icon, label, hint }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; hint?: string }) {
+  return (
+    <Link
+      to={to}
+      className="flex flex-col items-start gap-2 rounded-2xl border border-border/60 bg-card p-4 transition-colors hover:border-accent/60"
+    >
+      <span className="grid h-9 w-9 place-items-center rounded-lg bg-muted"><Icon className="h-4 w-4" /></span>
+      <span className="text-sm font-medium">{label}</span>
+      {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+    </Link>
+  );
+}
+
+function VerificationBadge({ status }: { status: string }) {
+  const cfg = status === "approved"
+    ? { icon: ShieldCheck, label: "Verified", cls: "bg-green-500/10 text-green-600 border-green-500/20" }
+    : status === "rejected"
+    ? { icon: XCircle, label: "Rejected", cls: "bg-destructive/10 text-destructive border-destructive/20" }
+    : { icon: Clock, label: "Pending", cls: "bg-amber-500/10 text-amber-600 border-amber-500/20" };
+  const Icon = cfg.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${cfg.cls}`}>
+      <Icon className="h-3 w-3" /> {cfg.label}
+    </span>
   );
 }
 

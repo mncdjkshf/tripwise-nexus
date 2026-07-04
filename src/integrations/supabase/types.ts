@@ -100,46 +100,86 @@ export type Database = {
       }
       drivers_private: {
         Row: {
+          aadhaar_back_url: string | null
+          aadhaar_front_url: string | null
+          aadhaar_number: string | null
+          address: string | null
           car_number: string | null
           created_at: string
+          date_of_birth: string | null
+          dl_image_url: string | null
           driving_license: string | null
           email: string | null
+          emergency_contact: string | null
           full_name: string | null
+          gender: string | null
+          pan_number: string | null
+          pan_url: string | null
           personal_details_json: Json | null
           phone_number: string | null
+          profile_photo_url: string | null
           updated_at: string
           user_id: string
+          verification_status: string
         }
         Insert: {
+          aadhaar_back_url?: string | null
+          aadhaar_front_url?: string | null
+          aadhaar_number?: string | null
+          address?: string | null
           car_number?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          dl_image_url?: string | null
           driving_license?: string | null
           email?: string | null
+          emergency_contact?: string | null
           full_name?: string | null
+          gender?: string | null
+          pan_number?: string | null
+          pan_url?: string | null
           personal_details_json?: Json | null
           phone_number?: string | null
+          profile_photo_url?: string | null
           updated_at?: string
           user_id: string
+          verification_status?: string
         }
         Update: {
+          aadhaar_back_url?: string | null
+          aadhaar_front_url?: string | null
+          aadhaar_number?: string | null
+          address?: string | null
           car_number?: string | null
           created_at?: string
+          date_of_birth?: string | null
+          dl_image_url?: string | null
           driving_license?: string | null
           email?: string | null
+          emergency_contact?: string | null
           full_name?: string | null
+          gender?: string | null
+          pan_number?: string | null
+          pan_url?: string | null
           personal_details_json?: Json | null
           phone_number?: string | null
+          profile_photo_url?: string | null
           updated_at?: string
           user_id?: string
+          verification_status?: string
         }
         Relationships: []
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
           created_at: string
+          date_of_birth: string | null
           display_name: string | null
+          emergency_contact: string | null
           first_name: string | null
+          gender: string | null
           id: string
           is_validated: boolean
           last_name: string | null
@@ -148,10 +188,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
+          emergency_contact?: string | null
           first_name?: string | null
+          gender?: string | null
           id?: string
           is_validated?: boolean
           last_name?: string | null
@@ -160,10 +204,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
+          emergency_contact?: string | null
           first_name?: string | null
+          gender?: string | null
           id?: string
           is_validated?: boolean
           last_name?: string | null

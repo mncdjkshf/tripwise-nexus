@@ -14,6 +14,8 @@ import { Route as RideRouteImport } from './routes/ride'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as DriverProfileRouteImport } from './routes/driver-profile'
+import { Route as DriverDocumentsRouteImport } from './routes/driver-documents'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as BecomeDriverRouteImport } from './routes/become-driver'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -43,6 +45,16 @@ const LoginRoute = LoginRouteImport.update({
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverProfileRoute = DriverProfileRouteImport.update({
+  id: '/driver-profile',
+  path: '/driver-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverDocumentsRoute = DriverDocumentsRouteImport.update({
+  id: '/driver-documents',
+  path: '/driver-documents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DriverRoute = DriverRouteImport.update({
@@ -76,6 +88,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/become-driver': typeof BecomeDriverRoute
   '/driver': typeof DriverRoute
+  '/driver-documents': typeof DriverDocumentsRoute
+  '/driver-profile': typeof DriverProfileRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -88,6 +102,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/become-driver': typeof BecomeDriverRoute
   '/driver': typeof DriverRoute
+  '/driver-documents': typeof DriverDocumentsRoute
+  '/driver-profile': typeof DriverProfileRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -101,6 +117,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/become-driver': typeof BecomeDriverRoute
   '/driver': typeof DriverRoute
+  '/driver-documents': typeof DriverDocumentsRoute
+  '/driver-profile': typeof DriverProfileRoute
   '/history': typeof HistoryRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -115,6 +133,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/become-driver'
     | '/driver'
+    | '/driver-documents'
+    | '/driver-profile'
     | '/history'
     | '/login'
     | '/register'
@@ -127,6 +147,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/become-driver'
     | '/driver'
+    | '/driver-documents'
+    | '/driver-profile'
     | '/history'
     | '/login'
     | '/register'
@@ -139,6 +161,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/become-driver'
     | '/driver'
+    | '/driver-documents'
+    | '/driver-profile'
     | '/history'
     | '/login'
     | '/register'
@@ -152,6 +176,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BecomeDriverRoute: typeof BecomeDriverRoute
   DriverRoute: typeof DriverRoute
+  DriverDocumentsRoute: typeof DriverDocumentsRoute
+  DriverProfileRoute: typeof DriverProfileRoute
   HistoryRoute: typeof HistoryRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -197,6 +223,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/driver-profile': {
+      id: '/driver-profile'
+      path: '/driver-profile'
+      fullPath: '/driver-profile'
+      preLoaderRoute: typeof DriverProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/driver-documents': {
+      id: '/driver-documents'
+      path: '/driver-documents'
+      fullPath: '/driver-documents'
+      preLoaderRoute: typeof DriverDocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/driver': {
       id: '/driver'
       path: '/driver'
@@ -240,6 +280,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   BecomeDriverRoute: BecomeDriverRoute,
   DriverRoute: DriverRoute,
+  DriverDocumentsRoute: DriverDocumentsRoute,
+  DriverProfileRoute: DriverProfileRoute,
   HistoryRoute: HistoryRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
@@ -250,13 +292,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
