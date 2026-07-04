@@ -233,8 +233,56 @@ function DriverDashboard() {
 
           </div>
         )}
+
+        {/* Dashboard cards */}
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">Your dashboard</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <DashCard to="/driver-profile" icon={User} label="Profile" />
+            <DashCard to="/driver-documents" icon={FileText} label="Documents" />
+            <DashCard to="/history" icon={HistoryIcon} label="Trip history" />
+            <DashCard to="/driver" icon={Wallet} label="Earnings" hint={formatINR(earnings.data?.total ?? 0)} />
+            <DashCard to="/driver" icon={CarIcon} label="Vehicle" hint={driver.vehicle_plate ?? ""} />
+            <DashCard to="/driver" icon={LifeBuoy} label="Support" />
+            <DashCard to="/driver" icon={Settings} label="Settings" />
+            <button
+              onClick={async () => { await signOut(); nav({ to: "/login" }); }}
+              className="flex flex-col items-start gap-2 rounded-2xl border border-border/60 bg-card p-4 text-left transition-colors hover:border-destructive/60"
+            >
+              <span className="grid h-9 w-9 place-items-center rounded-lg bg-destructive/10 text-destructive"><LogOut className="h-4 w-4" /></span>
+              <span className="text-sm font-medium">Log out</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+  );
+}
+
+function DashCard({ to, icon: Icon, label, hint }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; hint?: string }) {
+  return (
+    <Link
+      to={to}
+      className="flex flex-col items-start gap-2 rounded-2xl border border-border/60 bg-card p-4 transition-colors hover:border-accent/60"
+    >
+      <span className="grid h-9 w-9 place-items-center rounded-lg bg-muted"><Icon className="h-4 w-4" /></span>
+      <span className="text-sm font-medium">{label}</span>
+      {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+    </Link>
+  );
+}
+
+function VerificationBadge({ status }: { status: string }) {
+  const cfg = status === "approved"
+    ? { icon: ShieldCheck, label: "Verified", cls: "bg-green-500/10 text-green-600 border-green-500/20" }
+    : status === "rejected"
+    ? { icon: XCircle, label: "Rejected", cls: "bg-destructive/10 text-destructive border-destructive/20" }
+    : { icon: Clock, label: "Pending", cls: "bg-amber-500/10 text-amber-600 border-amber-500/20" };
+  const Icon = cfg.icon;
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${cfg.cls}`}>
+      <Icon className="h-3 w-3" /> {cfg.label}
+    </span>
   );
 }
 
