@@ -149,7 +149,21 @@ function DriverDashboard() {
   return (
     <div className="min-h-screen">
       <NavBar />
-      <div className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
+        {/* Profile header */}
+        <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-border/60 bg-card p-5">
+          <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-muted">
+            {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : <User className="h-6 w-6 text-muted-foreground" />}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate text-base font-semibold">{driverInfo?.full_name ?? "Driver"}</p>
+              <VerificationBadge status={driverInfo?.verification_status ?? "pending"} />
+            </div>
+            <p className="text-xs text-muted-foreground">ID · {user?.id.slice(0, 8).toUpperCase()}</p>
+          </div>
+          <Button asChild variant="outline" size="sm"><Link to="/driver-profile">Edit profile</Link></Button>
+        </div>
         <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-card p-5">
           <div>
             <p className="text-xs text-muted-foreground">Driver mode</p>
