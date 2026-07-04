@@ -49,12 +49,12 @@ function DriverDocuments() {
 
   if (!user || !row) return <div className="min-h-screen"><NavBar /><div className="p-10 text-muted-foreground">Loading…</div></div>;
 
-  const docs: { key: keyof PrivateRow; kind: DocKind; label: string; col: string }[] = [
-    { key: "profile_photo_url", kind: "profile", label: "Profile photo", col: "profile_photo_url" },
-    { key: "aadhaar_front_url", kind: "aadhaar_front", label: "Aadhaar — Front", col: "aadhaar_front_url" },
-    { key: "aadhaar_back_url", kind: "aadhaar_back", label: "Aadhaar — Back", col: "aadhaar_back_url" },
-    { key: "pan_url", kind: "pan", label: "PAN card", col: "pan_url" },
-    { key: "dl_image_url", kind: "dl", label: "Driving licence", col: "dl_image_url" },
+  const docs: { key: keyof PrivateRow; kind: DocKind; label: string }[] = [
+    { key: "profile_photo_url", kind: "profile", label: "Profile photo" },
+    { key: "aadhaar_front_url", kind: "aadhaar_front", label: "Aadhaar — Front" },
+    { key: "aadhaar_back_url", kind: "aadhaar_back", label: "Aadhaar — Back" },
+    { key: "pan_url", kind: "pan", label: "PAN card" },
+    { key: "dl_image_url", kind: "dl", label: "Driving licence" },
   ];
 
   const status = row.verification_status;
