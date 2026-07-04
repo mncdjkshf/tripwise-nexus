@@ -85,7 +85,7 @@ function DriverDocuments() {
                 userId={user.id}
                 label={d.label}
                 value={row[d.key]}
-                onChange={(v) => update(d.col, v)}
+                onChange={(v) => update(d.key, v)}
                 aspect={d.kind === "profile" ? "square" : "card"}
               />
             </div>
