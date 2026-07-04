@@ -26,11 +26,13 @@ export const Route = createFileRoute("/driver")({
 });
 
 function DriverDashboard() {
-  const { user, loading, roles } = useAuth();
+  const { user, loading, roles, signOut } = useAuth();
   const nav = useNavigate();
   const [driver, setDriver] = useState<Driver | null>(null);
   const [requests, setRequests] = useState<Ride[]>([]);
   const [currentRide, setCurrentRide] = useState<Ride | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [driverInfo, setDriverInfo] = useState<{ full_name: string | null; verification_status: string; profile_photo_url: string | null } | null>(null);
   const earningsFn = useServerFn(getDriverEarnings);
   const earnings = useQuery({
     queryKey: ["driver-earnings", user?.id],
@@ -42,10 +44,16 @@ function DriverDashboard() {
   useEffect(() => { if (!loading && !user) nav({ to: "/login" }); }, [loading, user, nav]);
   useEffect(() => { if (!loading && user && !roles.includes("driver")) nav({ to: "/become-driver" }); }, [loading, user, roles, nav]);
 
-  // Load driver row
+  // Load driver row + private info
   useEffect(() => {
     if (!user) return;
     supabase.from("drivers").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => setDriver(data));
+    supabase.from("drivers_private").select("full_name,verification_status,profile_photo_url").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (data) {
+        setDriverInfo(data);
+        if (data.profile_photo_url) getSignedDriverUrl(data.profile_photo_url).then(setAvatarUrl);
+      }
+    });
   }, [user]);
 
   // Watch open requests + my assigned active ride
