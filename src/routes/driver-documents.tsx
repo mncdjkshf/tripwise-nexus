@@ -38,10 +38,11 @@ function DriverDocuments() {
       .eq("user_id", user.id).maybeSingle().then(({ data }) => setRow(data as PrivateRow | null));
   }, [user]);
 
-  const update = async (col: string, value: string | null) => {
+  const update = async (col: keyof PrivateRow, value: string | null) => {
     if (!user) return;
     setRow((r) => (r ? { ...r, [col]: value } as PrivateRow : r));
-    const { error } = await supabase.from("drivers_private").update({ [col]: value }).eq("user_id", user.id);
+    const patch: Record<string, string | null> = { [col]: value };
+    const { error } = await supabase.from("drivers_private").update(patch as never).eq("user_id", user.id);
     if (error) toast.error(error.message);
     else toast.success("Document updated");
   };
