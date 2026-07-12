@@ -7,25 +7,39 @@ const DriverRowSchema = z.object({
   phone: z.string().min(1).max(20),
   email: z.string().email().max(255),
   dob: z.string().max(20),
+  gender: z.string().max(20).default(""),
   emergency_contact: z.string().max(200),
   address: z.string().max(1000),
+  city: z.string().max(120).default(""),
+  state: z.string().max(120).default(""),
+  pin_code: z.string().max(10).default(""),
   vehicle_plate: z.string().max(40),
   vehicle_class: z.string().max(40),
   make: z.string().max(80),
   model: z.string().max(80),
+  vehicle_registration_number: z.string().max(80).default(""),
+  insurance_number: z.string().max(80).default(""),
+  insurance_expiry: z.string().max(20).default(""),
+  driving_experience_years: z.string().max(10).default(""),
   license_number: z.string().max(80),
-  background_notes: z.string().max(2000),
+  aadhaar_number: z.string().max(20).default(""),
+  pan_number: z.string().max(20).default(""),
+  bank_account_number: z.string().max(40).default(""),
+  bank_ifsc: z.string().max(20).default(""),
+  bank_account_holder: z.string().max(200).default(""),
+  upi_id: z.string().max(100).default(""),
+  profile_photo_url: z.string().max(500).default(""),
+  aadhaar_front_url: z.string().max(500).default(""),
+  aadhaar_back_url: z.string().max(500).default(""),
+  pan_url: z.string().max(500).default(""),
+  dl_url: z.string().max(500).default(""),
+  dl_back_url: z.string().max(500).default(""),
+  rc_url: z.string().max(500).default(""),
+  insurance_url: z.string().max(500).default(""),
+  onboarding_step: z.string().max(4).default(""),
   status: z.string().max(40),
 });
 
-// Appends a row to the configured Google Sheet via the Lovable Google Sheets connector.
-// Required env (provided by the google_sheets connector once linked):
-//   - LOVABLE_API_KEY
-//   - GOOGLE_SHEETS_API_KEY
-// Required app-level secret:
-//   - DRIVER_APPLICATIONS_SHEET_ID  (the spreadsheet ID)
-//   - DRIVER_APPLICATIONS_SHEET_TAB (optional, defaults to "Sheet1")
-// Auto-created sheet — change via env if you ever need to move it.
 const DEFAULT_SHEET_ID = "1upNzVjj9XlBJdixC4ppGvFKk1puTOcOZfORosi_5aN0";
 const DEFAULT_SHEET_TAB = "Applications";
 
@@ -49,18 +63,40 @@ export const syncDriverToSheet = createServerFn({ method: "POST" })
       data.phone,
       data.email,
       data.dob,
+      data.gender,
       data.emergency_contact,
       data.address,
-      data.vehicle_plate,
+      data.city,
+      data.state,
+      data.pin_code,
       data.vehicle_class,
       data.make,
       data.model,
+      data.vehicle_plate,
+      data.vehicle_registration_number,
+      data.insurance_number,
+      data.insurance_expiry,
+      data.driving_experience_years,
       data.license_number,
-      data.background_notes,
+      data.aadhaar_number,
+      data.pan_number,
+      data.bank_account_holder,
+      data.bank_account_number,
+      data.bank_ifsc,
+      data.upi_id,
+      data.profile_photo_url,
+      data.aadhaar_front_url,
+      data.aadhaar_back_url,
+      data.pan_url,
+      data.dl_url,
+      data.dl_back_url,
+      data.rc_url,
+      data.insurance_url,
+      data.onboarding_step,
       data.status,
     ];
 
-    const url = `https://connector-gateway.lovable.dev/google_sheets/v4/spreadsheets/${sheetId}/values/${sheetTab}!A:O:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    const url = `https://connector-gateway.lovable.dev/google_sheets/v4/spreadsheets/${sheetId}/values/${sheetTab}!A:AK:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
 
     const res = await fetch(url, {
       method: "POST",
@@ -78,5 +114,5 @@ export const syncDriverToSheet = createServerFn({ method: "POST" })
       return { synced: false, reason: `http_${res.status}` };
     }
 
-    return { synced: true };
+    return { synced: true, synced_at: new Date().toISOString() };
   });
