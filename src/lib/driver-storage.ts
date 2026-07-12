@@ -4,7 +4,15 @@ const MAX_IMAGE = 5 * 1024 * 1024;
 const MAX_DOC = 10 * 1024 * 1024;
 const IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-export type DocKind = "profile" | "aadhaar_front" | "aadhaar_back" | "pan" | "dl";
+export type DocKind =
+  | "profile"
+  | "aadhaar_front"
+  | "aadhaar_back"
+  | "pan"
+  | "dl"
+  | "dl_back"
+  | "rc"
+  | "insurance";
 
 const BUCKET: Record<DocKind, "driver-avatars" | "driver-documents"> = {
   profile: "driver-avatars",
@@ -12,6 +20,9 @@ const BUCKET: Record<DocKind, "driver-avatars" | "driver-documents"> = {
   aadhaar_back: "driver-documents",
   pan: "driver-documents",
   dl: "driver-documents",
+  dl_back: "driver-documents",
+  rc: "driver-documents",
+  insurance: "driver-documents",
 };
 
 export async function uploadDriverFile(kind: DocKind, userId: string, file: File): Promise<string> {

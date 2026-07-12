@@ -104,22 +104,40 @@ export type Database = {
           aadhaar_front_url: string | null
           aadhaar_number: string | null
           address: string | null
+          backup_sheet_synced_at: string | null
+          bank_account_holder: string | null
+          bank_account_number: string | null
+          bank_ifsc: string | null
           car_number: string | null
+          city: string | null
           created_at: string
           date_of_birth: string | null
+          dl_back_url: string | null
           dl_image_url: string | null
+          driving_experience_years: number | null
           driving_license: string | null
           email: string | null
           emergency_contact: string | null
           full_name: string | null
           gender: string | null
+          insurance_expiry: string | null
+          insurance_number: string | null
+          insurance_url: string | null
+          onboarding_completed: boolean
+          onboarding_step: number
           pan_number: string | null
           pan_url: string | null
           personal_details_json: Json | null
           phone_number: string | null
+          pin_code: string | null
+          profile_completion_percent: number
           profile_photo_url: string | null
+          rc_url: string | null
+          state: string | null
           updated_at: string
+          upi_id: string | null
           user_id: string
+          vehicle_registration_number: string | null
           verification_status: string
         }
         Insert: {
@@ -127,22 +145,40 @@ export type Database = {
           aadhaar_front_url?: string | null
           aadhaar_number?: string | null
           address?: string | null
+          backup_sheet_synced_at?: string | null
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
           car_number?: string | null
+          city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          dl_back_url?: string | null
           dl_image_url?: string | null
+          driving_experience_years?: number | null
           driving_license?: string | null
           email?: string | null
           emergency_contact?: string | null
           full_name?: string | null
           gender?: string | null
+          insurance_expiry?: string | null
+          insurance_number?: string | null
+          insurance_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: number
           pan_number?: string | null
           pan_url?: string | null
           personal_details_json?: Json | null
           phone_number?: string | null
+          pin_code?: string | null
+          profile_completion_percent?: number
           profile_photo_url?: string | null
+          rc_url?: string | null
+          state?: string | null
           updated_at?: string
+          upi_id?: string | null
           user_id: string
+          vehicle_registration_number?: string | null
           verification_status?: string
         }
         Update: {
@@ -150,22 +186,40 @@ export type Database = {
           aadhaar_front_url?: string | null
           aadhaar_number?: string | null
           address?: string | null
+          backup_sheet_synced_at?: string | null
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_ifsc?: string | null
           car_number?: string | null
+          city?: string | null
           created_at?: string
           date_of_birth?: string | null
+          dl_back_url?: string | null
           dl_image_url?: string | null
+          driving_experience_years?: number | null
           driving_license?: string | null
           email?: string | null
           emergency_contact?: string | null
           full_name?: string | null
           gender?: string | null
+          insurance_expiry?: string | null
+          insurance_number?: string | null
+          insurance_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: number
           pan_number?: string | null
           pan_url?: string | null
           personal_details_json?: Json | null
           phone_number?: string | null
+          pin_code?: string | null
+          profile_completion_percent?: number
           profile_photo_url?: string | null
+          rc_url?: string | null
+          state?: string | null
           updated_at?: string
+          upi_id?: string | null
           user_id?: string
+          vehicle_registration_number?: string | null
           verification_status?: string
         }
         Relationships: []
