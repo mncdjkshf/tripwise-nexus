@@ -1,0 +1,20 @@
+
+ALTER TABLE public.drivers_private
+  ADD COLUMN IF NOT EXISTS city text,
+  ADD COLUMN IF NOT EXISTS state text,
+  ADD COLUMN IF NOT EXISTS pin_code text,
+  ADD COLUMN IF NOT EXISTS vehicle_registration_number text,
+  ADD COLUMN IF NOT EXISTS insurance_number text,
+  ADD COLUMN IF NOT EXISTS insurance_expiry date,
+  ADD COLUMN IF NOT EXISTS driving_experience_years integer,
+  ADD COLUMN IF NOT EXISTS bank_account_number text,
+  ADD COLUMN IF NOT EXISTS bank_ifsc text,
+  ADD COLUMN IF NOT EXISTS bank_account_holder text,
+  ADD COLUMN IF NOT EXISTS upi_id text,
+  ADD COLUMN IF NOT EXISTS dl_back_url text,
+  ADD COLUMN IF NOT EXISTS rc_url text,
+  ADD COLUMN IF NOT EXISTS insurance_url text,
+  ADD COLUMN IF NOT EXISTS onboarding_completed boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS onboarding_step smallint NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS profile_completion_percent smallint NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS backup_sheet_synced_at timestamptz;
